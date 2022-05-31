@@ -1,17 +1,23 @@
 package hr.tvz.ivanovic.hardwareapp;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import org.junit.jupiter.api.Test;
+import org.junit.Before;
+import org.junit.jupiter.api.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
+import org.springframework.mock.web.MockHttpServletResponse;
 import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.web.servlet.MockMvc;
+import org.springframework.test.web.servlet.MvcResult;
+import org.springframework.test.web.servlet.result.MockMvcResultHandlers;
 
 import javax.print.attribute.standard.Media;
 import javax.transaction.Transactional;
+import java.io.UnsupportedEncodingException;
 import java.nio.charset.StandardCharsets;
 import java.util.HashMap;
 import java.util.Map;
@@ -26,13 +32,65 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 @AutoConfigureMockMvc
 class HardwareControllerTest {
 
-    static String userToken = "eyJhbGciOiJIUzUxMiJ9.eyJzdWIiOiJ1c2VyIiwiZXhwIjoxNjU0MzUyMTgyLCJpYXQiOjE2NTM3NDczODIsImF1dGhvcml0aWVzIjoiUk9MRV9VU0VSIn0.I_PKTOxK51jo57xhehPm2qa7dV39wirXQg8Mz27audJ_lQpxSJcY9saRB__-uNHR6MNk-YFf0PAdjuqwHX6HMw";
-    static String adminToken ="eyJhbGciOiJIUzUxMiJ9.eyJzdWIiOiJhZG1pbiIsImV4cCI6MTY1NDM1MjIxNSwiaWF0IjoxNjUzNzQ3NDE1LCJhdXRob3JpdGllcyI6IlJPTEVfQURNSU4ifQ.d_SKTL7hOAXsHv0pEXB0nwOFUdsCeTwqK3UVWV-H_9iat4qveDhkcCW3YsIx9D1kGbdtOVcPo2rzBEMBC2lWhA";
+    //static String userToken = "eyJhbGciOiJIUzUxMiJ9.eyJzdWIiOiJ1c2VyIiwiZXhwIjoxNjU0MzUyMTgyLCJpYXQiOjE2NTM3NDczODIsImF1dGhvcml0aWVzIjoiUk9MRV9VU0VSIn0.I_PKTOxK51jo57xhehPm2qa7dV39wirXQg8Mz27audJ_lQpxSJcY9saRB__-uNHR6MNk-YFf0PAdjuqwHX6HMw";
+    //static String adminToken ="eyJhbGciOiJIUzUxMiJ9.eyJzdWIiOiJhZG1pbiIsImV4cCI6MTY1NDM1MjIxNSwiaWF0IjoxNjUzNzQ3NDE1LCJhdXRob3JpdGllcyI6IlJPTEVfQURNSU4ifQ.d_SKTL7hOAXsHv0pEXB0nwOFUdsCeTwqK3UVWV-H_9iat4qveDhkcCW3YsIx9D1kGbdtOVcPo2rzBEMBC2lWhA";
+
+     String adminToken;
+     String userToken;
 
     @Autowired
     private MockMvc mockMvc;
-
+    @Autowired
     ObjectMapper objectMapper = new ObjectMapper();
+
+
+
+    @BeforeEach
+    public void setAdminToken() throws Exception {
+        Map<String,Object> body = new HashMap<>();
+        body.put("username", "admin");
+        body.put("password", "adminpass");
+
+        MvcResult res = this.mockMvc.perform(
+                        post("/authentication/login")
+                                .contentType(MediaType.APPLICATION_JSON)
+                                .content(objectMapper.writeValueAsString(body))
+                )
+                .andExpect(status().isOk())
+                .andExpect(content().contentTypeCompatibleWith(MediaType.APPLICATION_JSON))
+                .andExpect(content().encoding(StandardCharsets.UTF_8))
+                .andExpect(jsonPath("$.jwt").isNotEmpty()).andReturn();
+
+
+        String nesto = res.getResponse().getContentAsString();
+        String adminToken = nesto.substring(8,nesto.length()-2);
+        this.adminToken = adminToken;
+
+    }
+
+    @BeforeEach
+    public void setUserToken() throws Exception {
+        Map<String,Object> body = new HashMap<>();
+        body.put("username", "user");
+        body.put("password", "userpass");
+
+        MvcResult res = this.mockMvc.perform(
+                        post("/authentication/login")
+                                .contentType(MediaType.APPLICATION_JSON)
+                                .content(objectMapper.writeValueAsString(body))
+                )
+                .andExpect(status().isOk())
+                .andExpect(content().contentTypeCompatibleWith(MediaType.APPLICATION_JSON))
+                .andExpect(content().encoding(StandardCharsets.UTF_8))
+                .andExpect(jsonPath("$.jwt").isNotEmpty()).andReturn();
+
+
+        String nesto = res.getResponse().getContentAsString();
+        String userToken = nesto.substring(8,nesto.length()-2);
+        this.userToken = userToken;
+
+    }
+
     @Test
     void getAllHardware() throws Exception {
 
