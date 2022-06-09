@@ -3,6 +3,7 @@ package hr.tvz.ivanovic.hardwareapp;
 import org.springframework.stereotype.Repository;
 
 import java.util.*;
+import java.util.stream.Collectors;
 
 @Repository
 public class RepositoryImplement implements HardwareRepository{
@@ -43,6 +44,11 @@ public class RepositoryImplement implements HardwareRepository{
 
         }
         return Optional.empty();
+    }
+
+    @Override
+    public List<Hardware> findIfInStock() {
+        return HARDWARE_LIST.stream().filter(hardware -> hardware.getStock() >0).collect(Collectors.toList());
     }
 
     @Override

@@ -11,5 +11,7 @@ public interface HardwareRepository {
 
     Optional<Hardware> save (Hardware hardware);
 
+    List<Hardware> findIfInStock();
+
     boolean delete (String code);
 }

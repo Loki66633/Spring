@@ -54,6 +54,11 @@ public class JdbcHardwareRepository implements HardwareRepository{
     }
 
     @Override
+    public List<Hardware> findIfInStock() {
+        return List.copyOf(jdbc.query("SELECT * FROM HARDWARE WHERE article_Code > 0",this::mapRowToHardware));
+    }
+
+    @Override
     public boolean delete(String code) {
         if(jdbc.update("DELETE FROM hardware WHERE article_Code = ?", code)==1){
             return true;
