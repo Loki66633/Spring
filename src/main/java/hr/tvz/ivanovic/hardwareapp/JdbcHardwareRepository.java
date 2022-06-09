@@ -79,7 +79,7 @@ public class JdbcHardwareRepository implements HardwareRepository{
             case "STORAGE" -> Hardware.Type.STORAGE;
             default -> Hardware.Type.OTHER;
         };
-        System.out.println(name+articleCode+articleType+price+stock);
+        //System.out.println(name+articleCode+articleType+price+stock);
         return new Hardware(name,articleCode,articleType,stock,price);
     }
 
